@@ -1,4 +1,13 @@
 const mongoose = require('mongoose');
+
+process.on('uncaughtException', (err) => {
+  // sync code error handler
+  console.log(err.name, err.message);
+  console.error('UNCAUGHT EXCEPTION');
+  // 0: success and 1: uncause exception
+  process.exit(1);
+});
+
 // eslint-disable-next-line import/newline-after-import
 const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
