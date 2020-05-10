@@ -30,6 +30,15 @@ mongoose
 
 const port = 3000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Listening on port ${port}`);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  console.error('UNHANDLED REJECTION');
+  server.close(() => {
+    // 0: success and 1: uncause exception
+    process.exit(1);
+  });
 });
