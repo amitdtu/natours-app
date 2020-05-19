@@ -3,22 +3,23 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
-exports.getAllReview = catchAsync(async (req, res, next) => {
-  let filter = {};
-  if (req.params.tourId) filter = { tour: req.params.tourId };
+exports.getAllReview = factory.getAll(Review);
+// catchAsync(async (req, res, next) => {
+//   let filter = {};
+//   if (req.params.tourId) filter = { tour: req.params.tourId };
 
-  const reviews = await Review.find(filter);
+//   const reviews = await Review.find(filter);
 
-  if (!reviews) next(new AppError('No review found.', 400));
+//   if (!reviews) next(new AppError('No review found.', 400));
 
-  res.status(200).json({
-    status: 'success',
-    result: reviews.length,
-    data: {
-      reviews,
-    },
-  });
-});
+//   res.status(200).json({
+//     status: 'success',
+//     result: reviews.length,
+//     data: {
+//       reviews,
+//     },
+//   });
+// });
 
 exports.setTourAndUserIds = (req, res, next) => {
   // Allow nested routes
@@ -28,6 +29,7 @@ exports.setTourAndUserIds = (req, res, next) => {
   next();
 };
 
+exports.getReview = factory.getOne(Review);
 exports.createReview = factory.createOne(Review);
 exports.deleteReview = factory.deleteOne(Review);
 exports.updateReview = factory.updateOne(Review);

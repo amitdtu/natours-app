@@ -11,22 +11,6 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find();
-
-  res.json({
-    result: users.length,
-    status: 'success',
-    data: {
-      users,
-    },
-  });
-  // res.status(500).json({
-  //   status: 'error',
-  //   message: 'route not define yet',
-  // });
-});
-
 exports.updateMe = catchAsync(async (req, res, next) => {
   const { password, passwordConfirm } = req.body;
   if (password || passwordConfirm) {
@@ -66,12 +50,8 @@ exports.createUser = (req, res) => {
   });
 };
 
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'route not define yet',
-  });
-};
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
 
 // do not update password with this
 exports.updateUser = factory.updateOne(User);
