@@ -11,6 +11,31 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  res.cookie('jwt', token, cookieOptions);
+
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  // remove password from user output
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   // const newUser = await User.create(req.body);
   const { name, email, password, passwordConfirm, role } = req.body;
@@ -22,15 +47,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     role,
   });
 
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -51,11 +68,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) if everything is ok then send token to client
-  const token = signToken(user._id);
-  res.status(201).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 201, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -74,7 +87,6 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // 2) verify token
   const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  console.log(decode);
 
   // 3) check if user is exists
   const currentUser = await User.findById(decode.id);
@@ -166,11 +178,25 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save();
 
-  // 3) update changedPasswordAt property of user
+  // 3) update changedPasswordAt property of user (works in userModel instance)
   // 4) Log the user in and send JWT
-  const token = signToken(user._id);
-  res.status(201).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword, newPasswordConfirm } = req.body;
+  // 1) Get user from collection
+  const user = await User.findById(req.user.id).select('+password');
+
+  // 2) check if posted current password is correct
+  if (!(await user.correctPassword(currentPassword, user.password)))
+    return next(new AppError('Current password is incorrect.'));
+
+  // 3) if so, update password
+  user.password = newPassword;
+  user.passwordConfirm = newPasswordConfirm;
+  await user.save();
+
+  // 4) login the user, send jwt
+  createSendToken(user, 200, res);
 });

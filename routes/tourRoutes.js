@@ -2,7 +2,7 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
-
+const reviewRouter = require('../routes/reviewRoutes');
 const router = express.Router();
 
 // router.param('id', tourController.checkId);
@@ -27,5 +27,11 @@ router
     authController.restrictedTo('admin', 'lead-guide'),
     tourController.deleteTour
   );
+
+// POST /tour/sa4564s5da4s54/reviews   (create review for a tour)
+// GET /tour/sa4564s5da4s54/reviews  (get reviews for a tour)
+// POST /tour/sa4564s5da4s54/review/adas4d5adsa1d54a5 (get specific review)
+
+router.use('/:tourId/reviews', reviewRouter); // if router starts with this url then redirect to reviewRouter
 
 module.exports = router;

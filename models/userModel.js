@@ -42,7 +42,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'guide', 'lead-guide', 'admin'],
     default: 'user',
   },
-
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
   passwordResetToken: String,
   passwordResetExpires: Date,
 });
@@ -60,9 +64,16 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// change passwordChangedAt time if password is changed
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
+  // console.log('change date of passwordChangedAt');
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 
@@ -79,7 +90,8 @@ userSchema.methods.changePasswordAfter = function (jwtTimestamp) {
       this.passwordChangedAt.getTime() / 1000,
       10
     );
-    console.log(changedPassword, jwtTimestamp);
+    // console.log(changedPassword, jwtTimestamp);
+    // console.log(changedPassword > jwtTimestamp);
 
     return changedPassword > jwtTimestamp;
   }
