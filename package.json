@@ -9,8 +9,7 @@
     "debug": "ndb server.js",
     "client": "npm start --prefix client",
     "concurrently": "concurrently \"npm run client\" \" npm run start\"",
-    "client-install": "npm install --prefix client",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "client-install": "npm install --prefix client"
   },
   "author": "Amit",
   "license": "ISC",
