@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const morgan = require('morgan');
 const rateLimiter = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -75,6 +76,14 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/booking', bookingRouter);
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'));
+
+  app.use(function (req, res) {
+    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  });
+}
 
 app.use('*', (req, res, next) => {
   // const err = new Error(`cannot find ${req.originalUrl}. url on this server`);
