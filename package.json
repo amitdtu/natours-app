@@ -10,7 +10,7 @@
     "client": "npm start --prefix client",
     "concurrently": "concurrently \"npm run client\" \" npm run start\"",
     "client-install": "npm install --prefix client",
-    "heroku-postbuild": "NODE_CONFIG_PRIDUCTION=false npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "NODE_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "author": "Amit",
   "license": "ISC",
