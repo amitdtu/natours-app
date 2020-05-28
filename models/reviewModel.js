@@ -11,7 +11,6 @@ const reviewSchema = new mongoose.Schema(
       type: Number,
       minLength: [1, 'Rating must be greater than or equal to 1'],
       maxLength: [5, 'Rating must be less than or equal to 5'],
-      set: (val) => Math.round(val * 10) / 10,
     },
     createdAt: {
       type: Date,
@@ -33,6 +32,8 @@ const reviewSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
 reviewSchema.pre(/^find/, function (next) {
   //   this.populate({
@@ -77,8 +78,6 @@ reviewSchema.statics.calcAverageRating = async function (tourId) {
     });
   }
 };
-
-reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
 reviewSchema.post('save', function () {
   this.constructor.calcAverageRating(this.tour);

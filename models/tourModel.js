@@ -35,6 +35,7 @@ const TourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, 'rating must be above 1'],
       max: [5, 'rating must be below 5'],
+      set: (val) => Math.round(val * 10) / 10, // 4.6666, 46.6666, 47, 4.7
     },
     ratingsQuantity: {
       type: Number,
@@ -112,11 +113,13 @@ const TourSchema = new mongoose.Schema(
 // 1 is for ascending order and -1 is for descending order
 TourSchema.index({ price: 1, ratingsAverage: -1 });
 TourSchema.index({ slug: 1 });
+TourSchema.index({ startLocation: '2dsphere' });
 
 TourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// referencing reviews in tour
 TourSchema.virtual('review', {
   ref: 'Review',
   foreignField: 'tour', // in Review Modal
@@ -167,11 +170,11 @@ TourSchema.post(/^find/, function (doc, next) {
 });
 
 // AGGREATE MIDDLEWARE
-TourSchema.pre('aggregate', function (next) {
-  // this.pipeline() returns array and unshift method used to add element at index 0
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+// TourSchema.pre('aggregate', function (next) {
+//   // this.pipeline() returns array and unshift method used to add element at index 0
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', TourSchema);
 

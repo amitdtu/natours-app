@@ -37,7 +37,7 @@ mongoose
 //   .then((doc) => console.log(doc))
 //   .catch((err) => console.log('Error :', err));
 
-const port = 3000;
+const port = 8000;
 
 const server = app.listen(port, () => {
   console.log(`Listening on port ${port}`);

@@ -2,10 +2,16 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
-const reviewRouter = require('../routes/reviewRoutes');
+const reviewRouter = require('./reviewRoutes');
+
 const router = express.Router();
 
 // router.param('id', tourController.checkId);
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin);
+
+router.route('/distance/:latlng/unit/:unit').get(tourController.getDistance);
 
 router
   .route('/top-5-cheap')
@@ -34,6 +40,8 @@ router
   .patch(
     authController.protect,
     authController.restrictedTo('admin', 'lead-guide'),
+    tourController.uploadImages,
+    tourController.rezsizeTourImages,
     tourController.updateTour
   )
   .delete(
